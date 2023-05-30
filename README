@@ -1,0 +1,65 @@
+The following tool is used to produce simple/crude simulated gamma-ray spectra based on your input decay scheme
+and compare to your real gamma-ray spectra
+An example file using 56Co decay data to run this tool is included 
+
+There are three input codes for these simulations
+There is one code to simulate a singles spectrum and a second code to simulate gamma-gated coincidence spectra
+There is a separate code called by both of these files to read the required input data
+The required input data for both codes are the same
+
+SimulateSingles.cc -> To simulate singles spectra
+SimulateCoincidences.cc -> To simulate coincidence spectra
+ReadInputData.cc -> To input the required input data
+
+There are also two scripts to run with the example file
+These are RunSimulateSinglesExample.cc and RunSimulateCoincidencesExample.cc
+To run these examples, the user only needs to load the script in a root/grsisort session and execute the functions
+e.g
+> grsisort -l
+> .L RunSimulateSinglesExample.cc
+> RunFullSimulation()
+
+
+ReadInputData.cc info
+This is the first code that the simulations require.
+This code is uses functions to read in text files and to open the root file
+Step to perform
+> grsisort -l 
+> 	.L ReadInputData.cc
+> 	ReadDecayScheme("TransitionList.dat"); //this reads in your decay information
+>	GetEfficiency("MyExpEffnew.dat"); //reads in your efficiency data
+>	GetPeakWidth("PeakWidths.dat"); //reads in your peak width data
+>	ReadEscapePeaks("EscapePeaks.dat"); //reads in your relative escape peak intensity info
+>	GetRealSpectra("ExampleFile.root","hgE_56Co"); //get your real histogram
+>	GetSpectrumBackground(hRealSpectra); //extracts exp background!
+
+Please see comments in code for more information!
+
+
+SimulateSingles.cc info
+Requires the previous input from the ReadInputData.cc code!
+Functions	
+	FillSimulation(); //fills the simulated full energy peaks
+	FillEscapePeaks(); //fills the simulated escape peaks
+	BuildSimuledSpectra(hSimPeaks,hBkgr,hEscPeaks); //adds the simulated peaks to the extracted background
+
+Run the RunSimulateSinglesExample.cc with the ExampleFile.root to see the output!
+
+
+SimulateCoincidences.cc!
+This is the more complicated of the tools!
+Again this code requires the input from the ReadInputData.cc code
+It does not require anything from the SimulateSingles.cc code
+The code requires the following functions be performed
+
+	GetLevelList(); //requires no arguments
+	FixTransitionList(); //requires no arguments
+	CalcLevelFeedingAndGammaBR(); //requires no arguments
+	FindCoincidences(); //requires no arguments
+	ReduceGammaGammaList(); //requires no arguments
+	FillCoincMatrix( Nbins, lower_bound, upper_bound ); //can provide desired binning
+	GateOnSimMat( Gate_low, Gate_high ); //best to give same gate used for experimental spectra
+	FillEscPeakSpec(SimMatProj); //must give simulated coinc. spectrum
+	BuildSimuledSpectra(SimMatProj,hBkgr,hEscPeak); //must give all three spectra
+
+
